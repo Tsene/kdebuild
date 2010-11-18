@@ -1,0 +1,210 @@
+#!/usr/bin/env ruby
+
+################################################################################
+## Script written by Rafael Fernández López <ereslibre@kde.org>               ##
+##                                                                            ##
+##                                                                            ##
+## This script is of PUBLIC DOMAIN.                                           ##
+################################################################################
+
+#### CONFIGURE #################################################################
+
+INSTALL_PREFIX = "/usr/local"
+MAKE_OPTIONS = "-j5"
+BUILD_TYPE = "Debug"
+SOURCE_DIR = File.expand_path "~/rofl"
+DEFAULT_OBJECTIVE = :full_kde
+
+#### INTERNAL ##################################################################
+
+ENV["PKG_CONFIG_PATH"] = "#{INSTALL_PREFIX}/lib/pkgconfig:#{ENV["PKG_CONFIG_PATH"]}"
+
+require "fileutils"
+
+$options = {}
+$options[:build_only] = false
+$options[:omit_dependencies] = false
+$options[:list_available_tasks] = false
+
+$tasks = Hash.new
+
+class Repository
+
+  attr_reader :uri
+
+  SVN_REPO = 0
+  GIT_REPO = 1
+
+  def initialize(uri, type)
+    @uri = uri
+    @type = type
+  end
+
+  def clone
+    if @type == SVN_REPO
+      system "svn co #{uri} ."
+    else
+      system "git clone #{uri} ."
+    end
+  end
+
+  def update
+    if @type == SVN_REPO
+      system "svn up"
+    else
+      system "git pull origin master"
+    end
+  end
+
+end
+
+class Task
+
+  attr_reader :name, :repository, :dependencies
+
+  def initialize(name, source, repository, dependencies = nil)
+    @name = name
+    @source = source
+    @repository = repository
+    @dependencies = dependencies
+    @touched = false
+    $tasks[name] = self
+  end
+
+  def update
+    return if @touched # We already worked on this one
+    source_dir = File.join SOURCE_DIR, @source
+    if not File.exists? source_dir
+      FileUtils.mkdir_p source_dir
+      Dir.chdir source_dir do
+        @repository.clone
+      end
+    else
+      Dir.chdir source_dir do
+        @repository.update
+      end
+    end
+  end
+
+  def build
+    return if @touched # We already worked on this one
+    for dependency in @dependencies
+      run_task dependency
+    end if @dependencies and not $options[:omit_dependencies]
+    return if not @source # Meta-task
+    build_dir = File.join SOURCE_DIR, @source, "build"
+    need_cmake = false
+    if not File.exists? build_dir
+      Dir.mkdir build_dir
+      need_cmake = true
+    end
+    Dir.chdir build_dir do
+      if need_cmake
+        system "cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} .."
+      end
+      system "make #{MAKE_OPTIONS}"
+      system "sudo make install"
+      @touched = true
+    end
+  end
+
+  def update_and_build
+    return if @touched # We already worked on this one
+    for dependency in @dependencies
+      $tasks[dependency].update_and_build if $tasks[dependency]
+    end if @dependencies and not $options[:omit_dependencies]
+    return if not @source # Meta-task
+    update; build
+  end
+
+end
+
+def print_tasks
+  $tasks.each_value do |task|
+    if not task.dependencies or task.dependencies.empty?
+      puts "\t-> #{task.name}\t\tNo dependencies"
+    else
+      puts "\t-> #{task.name}\t\tDepends on: #{task.dependencies.join ", "}"
+    end
+    if task.repository
+      puts "\t\t#{task.repository.uri}"
+    else
+      puts "\t\tMeta task (no repository associated)"
+    end
+  end
+end
+
+def run_task(task)
+  the_task = $tasks[task]
+  if the_task
+    if $options[:build_only]
+      the_task.build
+    else
+      the_task.update_and_build
+    end
+  else
+    puts "!!! Unknown task: #{task}. Existing tasks:"
+    print_tasks
+  end
+end
+
+#### DEFINE TASKS ##############################################################
+
+# KDE support and friends
+Task.new :phonon, "phonon", Repository.new("git@gitorious.org:phonon/phonon.git", Repository::GIT_REPO)
+Task.new :akonadi, "akonadi", Repository.new("git@git.kde.org:akonadi", Repository::GIT_REPO)
+Task.new :attica, "attica", Repository.new("git@git.kde.org:attica", Repository::GIT_REPO)
+Task.new :soprano, "soprano", Repository.new("git@git.kde.org:soprano", Repository::GIT_REPO)
+Task.new :kdesupport, "kde/kdesupport", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/kdesupport", Repository::SVN_REPO), [:phonon, :akonadi, :attica, :soprano]
+
+# KDE
+Task.new :kdelibs, "kde/KDE/kdelibs", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdelibs", Repository::SVN_REPO), [:kdesupport]
+Task.new :kdepimlibs, "kde/KDE/kdepimlibs", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdepimlibs", Repository::SVN_REPO), [:kdelibs]
+Task.new :kdebase, "kde/KDE/kdebase", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdebase", Repository::SVN_REPO), [:kdepimlibs]
+Task.new :kdegraphics, "kde/KDE/kdegraphics", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdegraphics", Repository::SVN_REPO), [:kdelibs]
+Task.new :kdemultimedia, "kde/KDE/kdemultimedia", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdemultimedia", Repository::SVN_REPO), [:kdelibs]
+Task.new :kdenetwork, "kde/KDE/kdenetwork", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdenetwork", Repository::SVN_REPO), [:kdelibs]
+Task.new :kdeplasma_addons, "kde/KDE/kdeplasma-addons", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeplasma-addons", Repository::SVN_REPO), [:kdelibs]
+Task.new :kdesdk, "kde/KDE/kdesdk", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdesdk", Repository::SVN_REPO), [:kdelibs]
+Task.new :kdepim, "kde/KDE/kdepim", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdepim", Repository::SVN_REPO), [:kdepimlibs]
+
+# KOffice
+Task.new :koffice, "kde/koffice", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/koffice", Repository::SVN_REPO), [:kdelibs]
+
+# KDevelop
+Task.new :kdevplatform, "kdevplatform", Repository.new("git@gitorious.org:kdevelop/kdevplatform.git", Repository::GIT_REPO), [:kdelibs]
+Task.new :kdevelop, "kdevelop", Repository.new("git@gitorious.org:kdevelop/kdevelop.git", Repository::GIT_REPO), [:kdevplatform]
+
+# Full KDE distribution
+Task.new :full_kde, nil, nil, [:kdebase, :kdegraphics, :kdemultimedia, :kdenetwork, :kdeplasma_addons, :kdesdk, :kdepim, :koffice, :kdevelop]
+
+#### PARSE ARGUMENTS AND START WORKING #########################################
+
+require "optparse"
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{$0} [-bo] [-l] [task1, task2, ...]"
+  opts.on("-b", "--build-only", "Do not update. Only build") do
+    $options[:build_only] = true
+  end
+  opts.on("-o", "--omit-dependencies", "Omit dependencies. Execute only the provided tasks") do
+    $options[:omit_dependencies] = true
+  end
+  opts.on("-l", "--list-available-tasks", "List available tasks") do
+    $options[:list_available_tasks] = true
+  end
+end.parse!
+
+if $options[:list_available_tasks]
+  puts "Available tasks:"
+  print_tasks
+  Process.exit
+end
+
+if ARGV.empty?
+  run_task :full_kde
+else
+  for arg in ARGV
+    run_task arg.to_sym
+  end
+end
