@@ -12,7 +12,7 @@
 INSTALL_PREFIX = "/usr/local"
 MAKE_OPTIONS = "-j5"
 BUILD_TYPE = "Debug"
-SOURCE_DIR = File.expand_path "~/rofl"
+SOURCE_DIR = File.expand_path "~/proyectos"
 DEFAULT_OBJECTIVE = :full_kde
 
 #### INTERNAL ##################################################################
@@ -72,7 +72,7 @@ class Task
   end
 
   def update
-    return if @touched # We already worked on this one
+    return if @touched
     source_dir = File.join SOURCE_DIR, @source
     if not File.exists? source_dir
       FileUtils.mkdir_p source_dir
@@ -87,7 +87,7 @@ class Task
   end
 
   def build
-    return if @touched # We already worked on this one
+    return if @touched
     for dependency in @dependencies
       run_task dependency
     end if @dependencies and not $options[:omit_dependencies]
