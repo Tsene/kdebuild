@@ -28,6 +28,7 @@ $options[:build_only] = false
 $options[:omit_dependencies] = false
 $options[:list_available_tasks] = false
 $options[:force_cmake] = false
+$options[:verbose] = false
 
 $tasks = Hash.new
 
@@ -50,20 +51,36 @@ class Repository
   def clone
     if @type == SVN_REPO
       info "Doing checkout of SVN repository"
-      IO.popen("svn co #{uri} .").readlines
+      if $options[:verbose]
+        system "svn co #{uri} ."
+      else
+        IO.popen("svn co #{uri} .").readlines
+      end
     else
       info "Cloning git repository"
-      IO.popen("git clone #{uri} .").readlines
+      if $options[:verbose]
+        system "git clone #{uri} ."
+      else
+        IO.popen("git clone #{uri} .").readlines
+      end
     end
   end
 
   def update
     if @type == SVN_REPO
       info "Updating SVN repository"
-      IO.popen("svn up").readlines
+      if $options[:verbose]
+        system "svn up"
+      else
+        IO.popen("svn up").readlines
+      end
     else
       info "Updating git repository"
-      IO.popen("git pull origin master").readlines
+      if $options[:verbose]
+        system "git pull origin master"
+      else
+        IO.popen("git pull origin master").readlines
+      end
     end
   end
 
@@ -116,12 +133,24 @@ class Task
     Dir.chdir build_dir do
       if need_cmake
         info "Running cmake"
-        IO.popen("cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} ..").readlines
+        if $options[:verbose]
+          system "cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} .."
+        else
+          IO.popen("cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} ..").readlines
+        end
       end
       info "Compiling"
-      IO.popen("make #{MAKE_OPTIONS}").readlines
+      if $options[:verbose]
+        system "make #{MAKE_OPTIONS}"
+      else
+        IO.popen("make #{MAKE_OPTIONS}").readlines
+      end
       info "Installing"
-      IO.popen("sudo make install/fast").readlines
+      if $options[:verbose]
+        system "sudo make install/fast"
+      else
+        IO.popen("sudo make install/fast").readlines
+      end
       @touched = true
     end
   end
@@ -188,6 +217,13 @@ Task.new :kdenetwork, "kde/KDE/kdenetwork", Repository.new("svn+ssh://svn.kde.or
 Task.new :kdeplasma_addons, "kde/KDE/kdeplasma-addons", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeplasma-addons", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdesdk, "kde/KDE/kdesdk", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdesdk", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdepim, "kde/KDE/kdepim", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdepim", Repository::SVN_REPO), [:kdepimlibs]
+Task.new :kdeedu, "kde/KDE/kdeedu", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeedu", Repository::SVN_REPO), [:kdelibs]
+Task.new :kdeutils, "kde/KDE/kdeutils", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeutils", Repository::SVN_REPO), [:kdelibs]
+Task.new :kdegames, "kde/KDE/kdegames", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdegames", Repository::SVN_REPO), [:kdelibs]
+Task.new :kdetoys, "kde/KDE/kdetoys", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdetoys", Repository::SVN_REPO), [:kdelibs]
+
+# kdereview
+Task.new :kdereview, "kde/kdereview", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/kdereview", Repository::SVN_REPO), [:kdelibs]
 
 # KOffice
 Task.new :koffice, "kde/koffice", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/koffice", Repository::SVN_REPO), [:kdelibs]
@@ -197,14 +233,14 @@ Task.new :kdevplatform, "kdevplatform", Repository.new("git@gitorious.org:kdevel
 Task.new :kdevelop, "kdevelop", Repository.new("git@gitorious.org:kdevelop/kdevelop.git", Repository::GIT_REPO), [:kdevplatform]
 
 # Full KDE distribution
-Task.new :full_kde, nil, nil, [:kdebase, :kdegraphics, :kdemultimedia, :kdenetwork, :kdeplasma_addons, :kdesdk, :kdepim, :koffice, :kdevelop]
+Task.new :full_kde, nil, nil, [:kdebase, :kdegraphics, :kdemultimedia, :kdenetwork, :kdeplasma_addons, :kdesdk, :kdepim, :kdeedu, :kdeutils, :kdegames, :kdetoys, :kdereview, :koffice, :kdevelop]
 
 #### PARSE ARGUMENTS AND START WORKING #########################################
 
 require "optparse"
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: #{$0} [-bof] [-l] [task1, task2, ...]"
+  opts.banner = "Usage: #{$0} [-bofv] [-l] [task1, task2, ...]"
   opts.on("-b", "--build-only", "Do not update. Only build") do
     $options[:build_only] = true
   end
@@ -213,6 +249,9 @@ OptionParser.new do |opts|
   end
   opts.on("-f", "--force-cmake", "Force CMake execution. Cleans old build(s)") do
     $options[:force_cmake] = true
+  end
+  opts.on("-v", "--verbose", "Output verbosity") do
+    $options[:verbose] = true
   end
   opts.on("-l", "--list-available-tasks", "List available tasks") do
     $options[:list_available_tasks] = true
