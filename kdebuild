@@ -17,6 +17,8 @@ DEFAULT_OBJECTIVE = :full_kde
 
 #### INTERNAL ##################################################################
 
+$stderr.reopen "/dev/null"
+
 ENV["PKG_CONFIG_PATH"] = "#{INSTALL_PREFIX}/lib/pkgconfig:#{ENV["PKG_CONFIG_PATH"]}"
 
 require "fileutils"
@@ -28,6 +30,10 @@ $options[:list_available_tasks] = false
 $options[:force_cmake] = false
 
 $tasks = Hash.new
+
+def info(info_msg)
+  puts "\t-> #{info_msg}..."
+end
 
 class Repository
 
@@ -43,17 +49,21 @@ class Repository
 
   def clone
     if @type == SVN_REPO
-      system "svn co #{uri} ."
+      info "Doing checkout of SVN repository"
+      IO.popen("svn co #{uri} .").readlines
     else
-      system "git clone #{uri} ."
+      info "Cloning git repository"
+      IO.popen("git clone #{uri} .").readlines
     end
   end
 
   def update
     if @type == SVN_REPO
-      system "svn up"
+      info "Updating SVN repository"
+      IO.popen("svn up").readlines
     else
-      system "git pull origin master"
+      info "Updating git repository"
+      IO.popen("git pull origin master").readlines
     end
   end
 
@@ -87,12 +97,13 @@ class Task
     end
   end
 
-  def build
+  def build(omit_banner = false)
     return if @touched
     for dependency in @dependencies
       run_task dependency
     end if @dependencies and not $options[:omit_dependencies]
     return if not @source # Meta-task
+    puts "=== Running task: #{@name} ===" if not omit_banner
     build_dir = File.join SOURCE_DIR, @source, "build"
     if $options[:force_cmake]
       FileUtils.rm_rf build_dir if File.exists? build_dir
@@ -104,10 +115,13 @@ class Task
     end
     Dir.chdir build_dir do
       if need_cmake
-        system "cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} .."
+        info "Running cmake"
+        IO.popen("cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} ..").readlines
       end
-      system "make #{MAKE_OPTIONS}"
-      system "sudo make install/fast"
+      info "Compiling"
+      IO.popen("make #{MAKE_OPTIONS}").readlines
+      info "Installing"
+      IO.popen("sudo make install/fast").readlines
       @touched = true
     end
   end
@@ -118,7 +132,8 @@ class Task
       $tasks[dependency].update_and_build if $tasks[dependency]
     end if @dependencies and not $options[:omit_dependencies]
     return if not @source # Meta-task
-    update; build
+    puts "=== Running task: #{@name} ==="
+    update; build true
   end
 
 end
