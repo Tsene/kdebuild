@@ -73,14 +73,14 @@ class Repository
       if $options[:verbose]
         system "svn co #{uri} ."
       else
-        IO.popen("svn co #{uri} .").readlines
+        IO.popen("svn co #{uri} .").read
       end
     else
       info "Cloning git repository"
       if $options[:verbose]
         system "git clone #{uri} ."
       else
-        IO.popen("git clone #{uri} .").readlines
+        IO.popen("git clone #{uri} .").read
       end
     end
     true
@@ -180,20 +180,20 @@ class Task
         if $options[:verbose]
           system "cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} .."
         else
-          IO.popen("cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} ..").readlines
+          IO.popen("cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} ..").read
         end
       end
       info "Compiling"
       if $options[:verbose]
         system "make #{MAKE_OPTIONS}"
       else
-        IO.popen("make #{MAKE_OPTIONS}").readlines
+        IO.popen("make #{MAKE_OPTIONS}").read
       end
       info "Installing"
       if $options[:verbose]
         system INSTALL_COMMAND
       else
-        IO.popen(INSTALL_COMMAND).readlines
+        IO.popen(INSTALL_COMMAND).read
       end
       puts
       @touched = true
