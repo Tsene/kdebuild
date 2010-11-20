@@ -294,7 +294,18 @@ if user_has_own_config
       end
       repository = Repository.new settings["repository"], (settings["repositoryType"].downcase == "svn" ? Repository::SVN_REPO : Repository::GIT_REPO)
       if settings.has_key? "dependencies"
-        Task.new task.to_sym, source, repository, settings["dependencies"].map { |e| e.to_sym }
+        if settings["dependencies"].include? task
+          puts "!!! Task #{task} includes itself as a dependency. Pretty weird, and the result will probably be 42"
+          Process.exit 1
+        end
+        Task.new task.to_sym, source, repository, settings["dependencies"].map { |e|
+          d = e.to_sym
+          if not known_task d
+            puts "!!! Task #{task} depends on unknown task #{e}"
+            Process.exit 1
+          end
+          d
+        }
       else
         Task.new task.to_sym, source, repository
       end
