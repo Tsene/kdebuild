@@ -74,18 +74,10 @@ class Repository
   def clone
     if @type == SVN_REPO
       info "Doing checkout of SVN repository"
-      if $options[:verbose]
-        system "svn co #{uri} ."
-      else
-        IO.popen("svn co #{uri} .").read
-      end
+      IO.popen("svn co #{uri} .").read
     else
       info "Cloning git repository"
-      if $options[:verbose]
-        system "git clone #{uri} ."
-      else
-        IO.popen("git clone #{uri} .").read
-      end
+      IO.popen("git clone #{uri} .").read
     end
     true
   end
@@ -93,18 +85,10 @@ class Repository
   def update
     if @type == SVN_REPO
       info "Updating SVN repository"
-      if $options[:verbose]
-        system "svn up"
-      else
-        (IO.popen("svn up").read =~ /Updated to revision \d+\./) != nil
-      end
+      (IO.popen("svn up").read =~ /Updated to revision \d+\./) != nil
     else
       info "Updating git repository"
-      if $options[:verbose]
-        system "git pull origin master"
-      else
-        IO.popen("git pull origin master").read !~ /Already up-to-date\./
-      end
+      IO.popen("git pull origin master").read !~ /Already up-to-date\./
     end
   end
 
