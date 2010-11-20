@@ -312,7 +312,7 @@ end
 require "optparse"
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: #{$0} [-bofv] [-l] [task1, task2, ...]"
+  opts.banner = "Usage: #{File.basename $0} [-bofv] [-l] [task1, task2, ...]"
   opts.on("-b", "--build-only", "Do not update. Only build") do
     $options[:build_only] = true
   end
