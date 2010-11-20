@@ -10,11 +10,11 @@
 #### CONFIGURE #################################################################
 
 INSTALL_PREFIX = "/usr/local"
+INSTALL_COMMAND = "sudo make install/fast"
 MAKE_OPTIONS = "-j5"
 BUILD_TYPE = "Debug"
 SOURCE_DIR = File.expand_path "~/proyectos"
 DEFAULT_OBJECTIVE = :full_kde
-INSTALL_COMMAND = "sudo make install/fast"
 
 #### INTERNAL ##################################################################
 
@@ -83,6 +83,7 @@ class Repository
         IO.popen("git clone #{uri} .").readlines
       end
     end
+    true
   end
 
   def update
@@ -115,6 +116,7 @@ class Task
     @repository = repository
     @dependencies = dependencies
     @touched = false
+    @no_news = true
     $tasks[name] = self
   end
 
@@ -124,11 +126,11 @@ class Task
     if not File.exists? source_dir
       FileUtils.mkdir_p source_dir
       Dir.chdir source_dir do
-        @repository.clone
+        @no_news = not @repository.clone
       end
     else
       Dir.chdir source_dir do
-        @repository.update
+        @no_news = not @repository.update
       end
     end
   end
@@ -139,6 +141,10 @@ class Task
       run_task dependency
     end if @dependencies and not $options[:omit_dependencies]
     return if not @source # Meta-task
+    if not $options[:build_only] and not $options[:force_cmake] and @no_news
+      puts "\t\tSkipping build and install phases. Repository was up-to-date"
+      return
+    end
     puts "=== Running task: #{@name} ===" if not omit_banner
     build_dir = File.join SOURCE_DIR, @source, "build"
     if $options[:force_cmake]
