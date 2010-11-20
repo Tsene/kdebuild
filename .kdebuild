@@ -1,5 +1,11 @@
 {
     "kdesupport": {
         "configure": "-DWITH_ASF=true -DWITH_MP4=true"
+    },
+
+    "spokify": {
+        "repositoryType": "git",
+        "repository": "git://ereslibre.es/spokify",
+        "dependencies": ["kdelibs"]
     }
 }

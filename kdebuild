@@ -26,6 +26,10 @@ def user_own_config
   File.new(File.join(ENV["HOME"], ".kdebuild")).read
 end
 
+def known_task(task)
+  $tasks.has_key? task.to_sym
+end
+
 begin
   require "json" if user_has_own_config
 rescue LoadError
@@ -279,6 +283,45 @@ Task.new :kdevelop, "kdevelop", Repository.new("git@gitorious.org:kdevelop/kdeve
 
 # Full KDE distribution
 Task.new :full_kde, nil, nil, [:kdebase, :kdegraphics, :kdemultimedia, :kdenetwork, :kdeplasma_addons, :kdesdk, :kdepim, :kdeedu, :kdeutils, :kdegames, :kdetoys, :kdereview, :koffice, :kdevelop]
+
+#### PARSE USER DEFINED TASKS ##################################################
+
+if user_has_own_config
+  begin
+    config = JSON.parse user_own_config
+    config.each do |task, settings|
+      next if known_task task
+      if not settings.has_key? "repositoryType"
+        puts "!!! Task #{task} is missing \"repositoryType\" entry"
+        Process.exit 1
+      end
+      if settings["repositoryType"].downcase != "svn" and settings["repositoryType"].downcase != "git"
+        puts "!!! \"repositoryType\" can only be: \"svn\" or \"git\". Found \"#{settings["repositoryType"]}\" at task #{task}"
+        Process.exit 1
+      end
+      if not settings.has_key? "repository"
+        puts "!!! Task #{task} is missing \"repository\" entry"
+        Process.exit 1
+      end
+      if settings.has_key? "source"
+        source = settings["source"]
+      else
+        source = task
+      end
+      repository = Repository.new settings["repository"], (settings["repositoryType"].downcase == "svn" ? Repository::SVN_REPO : Repository::GIT_REPO)
+      if settings.has_key? "dependencies"
+        Task.new task.to_sym, source, repository, settings["dependencies"].map { |e| e.to_sym }
+      else
+        Task.new task.to_sym, source, repository
+      end
+    end
+  rescue JSON::ParserError
+    puts "!!! Your own settings file under #{File.join(ENV["HOME"], ".kdebuild")} seems to be an invalid JSON file"
+    puts
+    puts "    Need help ? Try: http://www.jsonlint.com/"
+    Process.exit 1
+  end
+end
 
 #### PARSE ARGUMENTS AND START WORKING #########################################
 
