@@ -14,8 +14,27 @@ MAKE_OPTIONS = "-j5"
 BUILD_TYPE = "Debug"
 SOURCE_DIR = File.expand_path "~/proyectos"
 DEFAULT_OBJECTIVE = :full_kde
+INSTALL_COMMAND = "sudo make install/fast"
 
 #### INTERNAL ##################################################################
+
+def user_has_own_config
+  File.exists? File.join(ENV["HOME"], ".kdebuild")
+end
+
+def user_own_config
+  File.new(File.join(ENV["HOME"], ".kdebuild")).read
+end
+
+begin
+  require "json" if user_has_own_config
+rescue LoadError
+  puts "!!! You have set your own configuration on #{File.join(ENV["HOME"], ".kdebuild")}, and this"
+  puts "    format is JSON. In order to be able to understand the configuration file you need to run:"
+  puts
+  puts "    # sudo gem install json"
+  Process.exit 1
+end
 
 $stderr.reopen "/dev/null"
 
@@ -133,10 +152,27 @@ class Task
     Dir.chdir build_dir do
       if need_cmake
         info "Running cmake"
+        own_configs = ""
+        if user_has_own_config
+          begin
+            config = JSON.parse user_own_config
+            if config.has_key? @name.to_s and config[@name.to_s].has_key? "configure"
+              own_configs = config[@name.to_s]["configure"]
+              puts "\t\tUsing own configuration settings: #{own_configs}"
+            else
+              puts "\t\tNo own configuration settings found. Using defaults"
+            end
+          rescue JSON::ParserError
+            puts "!!! Your own settings file under #{File.join(ENV["HOME"], ".kdebuild")} seems to be an invalid JSON file"
+            puts
+            puts "    Need help ? Try: http://www.jsonlint.com/"
+            Process.exit 1
+          end
+        end
         if $options[:verbose]
-          system "cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} .."
+          system "cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} .."
         else
-          IO.popen("cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} ..").readlines
+          IO.popen("cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} ..").readlines
         end
       end
       info "Compiling"
@@ -147,9 +183,9 @@ class Task
       end
       info "Installing"
       if $options[:verbose]
-        system "sudo make install/fast"
+        system INSTALL_COMMAND
       else
-        IO.popen("sudo make install/fast").readlines
+        IO.popen(INSTALL_COMMAND).readlines
       end
       puts
       @touched = true

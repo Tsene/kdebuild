@@ -1,0 +1,5 @@
+{
+    "kdesupport": {
+        "configure": "-DWITH_ASF=true -DWITH_MP4=true"
+    }
+}
