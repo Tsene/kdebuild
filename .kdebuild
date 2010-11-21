@@ -23,6 +23,6 @@
     "choqok": {
         "repositoryType": "git",
         "repository": "git@git.kde.org:choqok",
-        "dependencies": ["qjson", "qoauth"]
+        "dependencies": ["kdelibs", "qjson", "qoauth"]
     }
 }
