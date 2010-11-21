@@ -98,11 +98,16 @@ class Task
 
   attr_reader :name, :repository, :dependencies
 
-  def initialize(name, source, repository, dependencies = nil)
+  CMAKE = 0
+  QMAKE = 1
+
+  def initialize(name, source, repository, dependencies = nil, build_system = CMAKE)
     @name = name
     @source = source
     @repository = repository
     @dependencies = dependencies
+    @build_system = build_system
+    @install_command = INSTALL_COMMAND
     @touched = false
     @no_news = true
     $tasks[name] = self
@@ -136,18 +141,24 @@ class Task
       return
     end
     puts "=== Running task: #{@name} ===" if not omit_banner
-    build_dir = File.join SOURCE_DIR, @source, "build"
-    if $options[:force_cmake]
-      FileUtils.rm_rf build_dir if File.exists? build_dir
-    end
-    need_cmake = false
-    if not File.exists? build_dir
-      Dir.mkdir build_dir
+    if @build_system == CMAKE
+      build_dir = File.join SOURCE_DIR, @source, "build"
+      if $options[:force_cmake]
+        FileUtils.rm_rf build_dir if File.exists? build_dir
+      end
+      need_cmake = false
+      if not File.exists? build_dir
+        Dir.mkdir build_dir
+        need_cmake = true
+      end
+    else
+      build_dir = File.join SOURCE_DIR, @source
       need_cmake = true
+      @install_command = "sudo make install"
     end
     Dir.chdir build_dir do
       if need_cmake
-        info "Running cmake"
+        info "Running #{@build_system == CMAKE ? "cmake" : "qmake"}"
         own_configs = ""
         if user_has_own_config
           begin
@@ -165,10 +176,18 @@ class Task
             Process.exit 1
           end
         end
-        if $options[:verbose]
-          system "cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} .."
+        if @build_system == CMAKE
+          if $options[:verbose]
+            system "cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} .."
+          else
+            IO.popen("cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} ..").read
+          end
         else
-          IO.popen("cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} ..").read
+          if $options[:verbose]
+            system "qmake"
+          else
+            IO.popen("qmake").read
+          end
         end
       end
       info "Compiling"
@@ -179,9 +198,9 @@ class Task
       end
       info "Installing"
       if $options[:verbose]
-        system INSTALL_COMMAND
+        system @install_command
       else
-        IO.popen(INSTALL_COMMAND).read
+        IO.popen(@install_command).read
       end
       puts
       @touched = true
@@ -293,6 +312,17 @@ if user_has_own_config
         source = task
       end
       repository = Repository.new settings["repository"], (settings["repositoryType"].downcase == "svn" ? Repository::SVN_REPO : Repository::GIT_REPO)
+      build_system = Task::CMAKE
+      if settings.has_key? "buildSystem"
+        if settings["buildSystem"].downcase == "cmake"
+          build_system = Task::CMAKE
+        elsif settings["buildSystem"].downcase == "qmake"
+          build_system = Task::QMAKE
+        else
+          puts "!!! Unknown buildSystem (#{settings["buildSystem"]}) for task #{task}"
+          Process.exit 1
+        end
+      end
       if settings.has_key? "dependencies"
         if settings["dependencies"].include? task
           puts "!!! Task #{task} includes itself as a dependency. Pretty weird, and the result will probably be 42"
@@ -305,9 +335,9 @@ if user_has_own_config
             Process.exit 1
           end
           d
-        }
+        }, build_system
       else
-        Task.new task.to_sym, source, repository
+        Task.new task.to_sym, source, repository, nil, build_system
       end
     end
   rescue JSON::ParserError
@@ -330,7 +360,7 @@ OptionParser.new do |opts|
   opts.on("-o", "--omit-dependencies", "Omit dependencies. Execute only the provided tasks") do
     $options[:omit_dependencies] = true
   end
-  opts.on("-f", "--force-cmake", "Force CMake execution. Cleans old build(s)") do
+  opts.on("-f", "--force-cmake", "Force CMake (or qmake) execution. Cleans old build(s)") do
     $options[:force_cmake] = true
   end
   opts.on("-v", "--verbose", "Output verbosity") do

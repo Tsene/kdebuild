@@ -7,5 +7,22 @@
         "repositoryType": "git",
         "repository": "git://ereslibre.es/spokify",
         "dependencies": ["kdelibs"]
+    },
+
+    "qjson": {
+        "repositoryType": "git",
+        "repository": "git://gitorious.org/qjson/qjson.git"
+    },
+
+    "qoauth": {
+        "repositoryType": "git",
+        "repository": "git://github.com/ayoy/qoauth.git",
+        "buildSystem": "qmake"
+    },
+
+    "choqok": {
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:choqok",
+        "dependencies": ["qjson", "qoauth"]
     }
 }
