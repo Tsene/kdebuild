@@ -281,10 +281,11 @@ Task.new :kdereview, "kde/kdereview", Repository.new("svn+ssh://svn.kde.org/home
 Task.new :koffice, "kde/koffice", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/koffice", Repository::SVN_REPO), [:kdelibs]
 
 # KDevelop
-Task.new :kdevplatform, "kdevplatform", Repository.new("git@gitorious.org:kdevelop/kdevplatform.git", Repository::GIT_REPO), [:kdelibs]
-Task.new :kdevelop, "kdevelop", Repository.new("git@gitorious.org:kdevelop/kdevelop.git", Repository::GIT_REPO), [:kdevplatform]
-Task.new :kdevelop_php, "kdevelop-php", Repository.new("git@gitorious.org:kdevelop/php.git", Repository::GIT_REPO), [:kdevelop]
-Task.new :kdevelop_php_docs, "kdevelop-php-docs", Repository.new("git@gitorious.org:kdevelop/php-docs.git", Repository::GIT_REPO)
+Task.new :kdevplatform, "kdevplatform", Repository.new("git@git.kde.org:kdevplatform", Repository::GIT_REPO), [:kdelibs]
+Task.new :kdevelop, "kdevelop", Repository.new("git@git.kde.org:kdevelop", Repository::GIT_REPO), [:kdevplatform]
+Task.new :kdevelop_pg_qt, "kdevelop-pg-qt", Repository.new("git@git.kde.org:kdevelop-pg-qt", Repository::GIT_REPO), [:kdevelop]
+Task.new :kdevelop_php, "kdevelop-php", Repository.new("git@git.kde.org:kdev-php", Repository::GIT_REPO), [:kdevelop, :kdevelop_pg_qt]
+Task.new :kdevelop_php_docs, "kdevelop-php-docs", Repository.new("git@git.kde.org:kdev-php-docs", Repository::GIT_REPO)
 Task.new :kdevelop_full, nil, nil, [:kdevelop_php, :kdevelop_php_docs]
 
 # Full KDE distribution
