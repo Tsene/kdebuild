@@ -253,13 +253,15 @@ end
 #### DEFINE TASKS ##############################################################
 
 # KDE support and friends
-Task.new :phonon, "phonon", Repository.new("git@gitorious.org:phonon/phonon.git", Repository::GIT_REPO)
+Task.new :phonon, "phonon", Repository.new("git@git.kde.org:phonon", Repository::GIT_REPO)
+Task.new :phonon_gstreamer, "phonon-gstreamer", Repository.new("git@git.kde.org:phonon-gstreamer", Repository::GIT_REPO)
+Task.new :phonon_full, nil, nil, [:phonon, :phonon_gstreamer]
 Task.new :polkit_qt_1, "polkit-qt-1", Repository.new("git@git.kde.org:polkit-qt-1", Repository::GIT_REPO)
 Task.new :automoc, "automoc", Repository.new("git@git.kde.org:automoc", Repository::GIT_REPO)
 Task.new :akonadi, "akonadi", Repository.new("git@git.kde.org:akonadi", Repository::GIT_REPO), [:automoc]
 Task.new :attica, "attica", Repository.new("git@git.kde.org:attica", Repository::GIT_REPO), [:automoc]
 Task.new :soprano, "soprano", Repository.new("git@git.kde.org:soprano", Repository::GIT_REPO), [:automoc]
-Task.new :kdesupport, "kde/kdesupport", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/kdesupport", Repository::SVN_REPO), [:phonon, :polkit_qt_1, :akonadi, :attica, :soprano]
+Task.new :kdesupport, "kde/kdesupport", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/kdesupport", Repository::SVN_REPO), [:phonon_full, :polkit_qt_1, :akonadi, :attica, :soprano]
 
 # KDE
 Task.new :kdelibs, "kde/KDE/kdelibs", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdelibs", Repository::SVN_REPO), [:kdesupport]
