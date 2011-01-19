@@ -1,6 +1,10 @@
 {
     "kdesupport": {
-        "configure": "-DWITH_ASF=true -DWITH_MP4=true"
+        "configure": "-DWITH_ASF=On -DWITH_MP4=On"
+    },
+
+    "network_management": {
+        "configure": "-DWITH_MobileBroadbandProviderInfo=Off"
     },
 
     "spokify": {
@@ -24,5 +28,11 @@
         "repositoryType": "git",
         "repository": "git@git.kde.org:choqok",
         "dependencies": ["kdelibs", "qjson", "qoauth"]
+    },
+
+    "bespin" : {
+        "repositoryType": "svn",
+        "repository": "https://cloudcity.svn.sourceforge.net/svnroot/cloudcity",
+        "dependencies": ["kdelibs"]
     }
 }

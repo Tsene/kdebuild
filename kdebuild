@@ -278,6 +278,9 @@ Task.new :kdeutils, "kde/KDE/kdeutils", Repository.new("svn+ssh://svn.kde.org/ho
 Task.new :kdegames, "kde/KDE/kdegames", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdegames", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdetoys, "kde/KDE/kdetoys", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdetoys", Repository::SVN_REPO), [:kdelibs]
 
+# Network management
+Task.new :network_management, "networkmanagement", Repository.new("git@git.kde.org:networkmanagement", Repository::GIT_REPO), [:kdebase]
+
 # kdereview
 Task.new :kdereview, "kde/kdereview", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/kdereview", Repository::SVN_REPO), [:kdelibs]
 
@@ -293,7 +296,7 @@ Task.new :kdevelop_php_docs, "kdevelop-php-docs", Repository.new("git@git.kde.or
 Task.new :kdevelop_full, nil, nil, [:kdevelop_php, :kdevelop_php_docs]
 
 # Full KDE distribution
-Task.new :full_kde, nil, nil, [:kdebase, :kdegraphics, :kdemultimedia, :kdenetwork, :kdeplasma_addons, :kdesdk, :kdepim, :kdeedu, :kdeutils, :kdegames, :kdetoys, :kdereview, :calligra, :kdevelop_full]
+Task.new :full_kde, nil, nil, [:kdebase, :kdegraphics, :kdemultimedia, :kdenetwork, :kdeplasma_addons, :kdesdk, :kdepim, :kdeedu, :kdeutils, :kdegames, :kdetoys, :network_management, :kdereview, :calligra, :kdevelop_full]
 
 #### PARSE USER DEFINED TASKS ##################################################
 
