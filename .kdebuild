@@ -3,10 +3,6 @@
         "configure": "-DWITH_ASF=On -DWITH_MP4=On"
     },
 
-    "network_management": {
-        "configure": "-DWITH_MobileBroadbandProviderInfo=Off"
-    },
-
     "spokify": {
         "repositoryType": "git",
         "repository": "git://ereslibre.es/spokify",
