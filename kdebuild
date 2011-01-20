@@ -272,7 +272,7 @@ Task.new :kdemultimedia, "kde/KDE/kdemultimedia", Repository.new("svn+ssh://svn.
 Task.new :kdenetwork, "kde/KDE/kdenetwork", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdenetwork", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdeplasma_addons, "kde/KDE/kdeplasma-addons", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeplasma-addons", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdesdk, "kde/KDE/kdesdk", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdesdk", Repository::SVN_REPO), [:kdelibs]
-Task.new :kdepim, "kde/KDE/kdepim", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdepim", Repository::SVN_REPO), [:kdepimlibs]
+Task.new :kdepim, "kde/KDE/kdepim", Repository.new("git@git.kde.org:kdepim", Repository::GIT_REPO), [:kdepimlibs]
 Task.new :kdeedu, "kde/KDE/kdeedu", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeedu", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdeutils, "kde/KDE/kdeutils", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeutils", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdegames, "kde/KDE/kdegames", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdegames", Repository::SVN_REPO), [:kdelibs]
