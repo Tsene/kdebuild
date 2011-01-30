@@ -264,9 +264,14 @@ Task.new :soprano, "soprano", Repository.new("git@git.kde.org:soprano", Reposito
 Task.new :kdesupport, "kde/kdesupport", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/kdesupport", Repository::SVN_REPO), [:phonon_full, :polkit_qt_1, :akonadi, :attica, :soprano]
 
 # KDE
-Task.new :kdelibs, "kde/KDE/kdelibs", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdelibs", Repository::SVN_REPO), [:kdesupport]
-Task.new :kdepimlibs, "kde/KDE/kdepimlibs", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdepimlibs", Repository::SVN_REPO), [:kdelibs]
-Task.new :kdebase, "kde/KDE/kdebase", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdebase", Repository::SVN_REPO), [:kdepimlibs]
+Task.new :kdelibs, "kde/KDE/kdelibs", Repository.new("git@git.kde.org:kdelibs", Repository::GIT_REPO), [:kdesupport]
+Task.new :kdepimlibs, "kde/KDE/kdepimlibs", Repository.new("git@git.kde.org:kdepimlibs", Repository::GIT_REPO), [:kdelibs]
+Task.new :konsole, "kde/KDE/kdebase-konsole", Repository.new("git@git.kde.org:konsole", Repository::GIT_REPO), [:kdelibs]
+Task.new :kate, "kde/KDE/kdebase-kate", Repository.new("git@git.kde.org:kate", Repository::GIT_REPO), [:kdelibs]
+Task.new :kde_baseapps, "kde/KDE/kde-baseapps", Repository.new("git@git.kde.org:kde-baseapps", Repository::GIT_REPO), [:kdelibs]
+Task.new :kde_workspace, "kde/KDE/kde-workspace", Repository.new("git@git.kde.org:kde-workspace", Repository::GIT_REPO), [:kdelibs]
+Task.new :kde_runtime, "kde/KDE/kde-runtime", Repository.new("git@git.kde.org:kde-runtime", Repository::GIT_REPO), [:kdelibs]
+Task.new :kdebase, nil, nil, [:kdepimlibs, :konsole, :kate, :kde_baseapps, :kde_workspace, :kde_runtime]
 Task.new :kdegraphics, "kde/KDE/kdegraphics", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdegraphics", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdemultimedia, "kde/KDE/kdemultimedia", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdemultimedia", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdenetwork, "kde/KDE/kdenetwork", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdenetwork", Repository::SVN_REPO), [:kdelibs]
