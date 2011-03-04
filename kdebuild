@@ -56,6 +56,10 @@ $options[:force_cmake] = false
 $options[:verbose] = false
 
 $tasks = Hash.new
+$failed_tasks = { :configure => Array.new,
+                  :build     => Array.new,
+                  :install   => Array.new }
+$succeeded_tasks = Array.new
 
 def info(info_msg)
   puts "\t-> #{info_msg}..."
@@ -76,10 +80,10 @@ class Repository
   def clone
     if @type == SVN_REPO
       info "Doing checkout of SVN repository"
-      IO.popen("svn co #{uri} .").read
+      IO.popen("svn co #{uri} . &> /dev/null") {}
     else
       info "Cloning git repository"
-      IO.popen("git clone #{uri} .").read
+      IO.popen("git clone #{uri} . &> /dev/null") {}
     end
     true
   end
@@ -159,6 +163,7 @@ class Task
       @install_command = "sudo make install"
     end
     Dir.chdir build_dir do
+      res = nil
       if need_cmake
         info "Running #{@build_system == CMAKE ? "cmake" : "qmake"}"
         own_configs = ""
@@ -182,27 +187,40 @@ class Task
           if $options[:verbose]
             system "cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} .."
           else
-            IO.popen("cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} ..").read
+            IO.popen("cmake -DCMAKE_BUILD_TYPE=#{BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=#{INSTALL_PREFIX} #{own_configs} .. &> /dev/null") {}
           end
         else
           if $options[:verbose]
             system "qmake"
           else
-            IO.popen("qmake").read
+            IO.popen("qmake &> /dev/null") {}
           end
         end
       end
       info "Compiling"
+      res = nil
       if $options[:verbose]
-        system "make #{MAKE_OPTIONS}"
+        res = system "make #{MAKE_OPTIONS}"
       else
-        IO.popen("make #{MAKE_OPTIONS}").read
+        IO.popen("make #{MAKE_OPTIONS} &> /dev/null") {}
+        res = ($?.to_i == 0)
       end
-      info "Installing"
-      if $options[:verbose]
-        system @install_command
+      if not res
+        $failed_tasks[:build] << self
       else
-        IO.popen(@install_command).read
+        info "Installing"
+        res = nil
+        if $options[:verbose]
+          res = system @install_command
+        else
+          IO.popen("#{@install_command} &> /dev/null") {}
+          res = ($?.to_i == 0)
+        end
+        if not res
+          $failed_tasks[:install] << self
+        else
+          $succeeded_tasks << self
+        end
       end
       puts
       @touched = true
@@ -408,5 +426,20 @@ if ARGV.empty?
 else
   for arg in ARGV
     run_task arg.to_sym
+  end
+end
+
+$failed_tasks.each do |phase, tasks|
+  next if tasks.empty?
+  puts "!!! Failed tasks at #{phase} phase"
+  tasks.each do |task|
+    puts "\t- #{task.name}"
+  end
+end
+
+if not $succeeded_tasks.empty?
+  puts "*** Succeeded tasks:"
+  $succeeded_tasks.each do |task|
+    puts "\t- #{task.name}"
   end
 end
