@@ -329,7 +329,7 @@ Task.new :kdevelop_php_docs, "kdevelop-php-docs", Repository.new("git@git.kde.or
 Task.new :kdevelop_full, nil, nil, [:kdevelop_php, :kdevelop_php_docs]
 
 # Full KDE distribution
-Task.new :full_kde, nil, nil, [:kdebase, :kdegraphics, :kdemultimedia, :kdenetwork, :kdeplasma_addons, :kdesdk, :kdepim, :kdeutils, :kdegames, :kdetoys, :network_management, :kwebkitpart, :kdereview, :gwenview, :calligra, :kdevelop_full]
+Task.new :full_kde, nil, nil, [:kdebase, :kdegraphics, :kdemultimedia, :kdenetwork, :kdeplasma_addons, :kdesdk, :kdepim, :kdeutils, :kdegames, :kdetoys, :network_management, :kwebkitpart, :kdereview, :rekonq, :gwenview, :calligra, :kdevelop_full]
 
 #### PARSE USER DEFINED TASKS ##################################################
 
