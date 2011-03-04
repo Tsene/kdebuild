@@ -66,6 +66,10 @@ def info(info_msg)
   puts "\t-> #{info_msg}..."
 end
 
+def warn(warn_msg)
+  puts "\t!!! #{warn_msg}"
+end
+
 class Repository
 
   attr_reader :uri
@@ -209,6 +213,7 @@ class Task
       end
       if not res
         $failed_tasks[:build] << self
+        warn "Build failed"
       else
         info "Installing"
         res = nil
@@ -220,6 +225,7 @@ class Task
         end
         if not res
           $failed_tasks[:install] << self
+          warn "Installation failed"
         else
           $succeeded_tasks << self
         end
@@ -436,6 +442,15 @@ if not $skipped_tasks.empty?
   $skipped_tasks.each do |task|
     puts "\t- #{task.name}"
   end
+  puts
+end
+
+if not $succeeded_tasks.empty?
+  puts "*** Succeeded tasks:"
+  $succeeded_tasks.each do |task|
+    puts "\t- #{task.name}"
+  end
+  puts
 end
 
 $failed_tasks.each do |phase, tasks|
@@ -444,11 +459,5 @@ $failed_tasks.each do |phase, tasks|
   tasks.each do |task|
     puts "\t- #{task.name}"
   end
-end
-
-if not $succeeded_tasks.empty?
-  puts "*** Succeeded tasks:"
-  $succeeded_tasks.each do |task|
-    puts "\t- #{task.name}"
-  end
+  puts
 end
