@@ -275,10 +275,11 @@ Task.new :kdebase, nil, nil, [:kdepimlibs, :konsole, :kate, :kde_baseapps, :kde_
 Task.new :kdegraphics, "kde/KDE/kdegraphics", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdegraphics", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdemultimedia, "kde/KDE/kdemultimedia", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdemultimedia", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdenetwork, "kde/KDE/kdenetwork", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdenetwork", Repository::SVN_REPO), [:kdelibs]
-Task.new :kdeplasma_addons, "kde/KDE/kdeplasma-addons", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeplasma-addons", Repository::SVN_REPO), [:kdelibs]
+Task.new :kdeplasma_addons, "kde/KDE/kdeplasma-addons", Repository.new("git@git.kde.org:kdeplasma-addons", Repository::GIT_REPO), [:kdelibs]
 Task.new :kdesdk, "kde/KDE/kdesdk", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdesdk", Repository::SVN_REPO), [:kdelibs]
-Task.new :kdepim, "kde/KDE/kdepim", Repository.new("git@git.kde.org:kdepim", Repository::GIT_REPO), [:kdepimlibs]
-Task.new :kdeedu, "kde/KDE/kdeedu", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeedu", Repository::SVN_REPO), [:kdelibs]
+Task.new :kdepim_runtime, "kde/KDE/kdepim-runtime", Repository.new("git@git.kde.org:kdepim-runtime", Repository::GIT_REPO), [:kdepimlibs]
+Task.new :kdepim, "kde/KDE/kdepim", Repository.new("git@git.kde.org:kdepim", Repository::GIT_REPO), [:kdepim_runtime]
+#Task.new :kdeedu, "kde/KDE/kdeedu", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeedu", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdeutils, "kde/KDE/kdeutils", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeutils", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdegames, "kde/KDE/kdegames", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdegames", Repository::SVN_REPO), [:kdelibs]
 Task.new :kdetoys, "kde/KDE/kdetoys", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdetoys", Repository::SVN_REPO), [:kdelibs]
@@ -292,6 +293,12 @@ Task.new :kwebkitpart, "kwebkitpart", Repository.new("git@git.kde.org:kwebkitpar
 # kdereview
 Task.new :kdereview, "kde/kdereview", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/kdereview", Repository::SVN_REPO), [:kdelibs]
 
+# Rekonq
+Task.new :rekonq, "kde/rekonq", Repository.new("git@git.kde.org:rekonq", Repository::GIT_REPO), [:kdelibs]
+
+# Gwenview
+Task.new :gwenview, "kde/KDE/gwenview", Repository.new("git@git.kde.org:gwenview", Repository::GIT_REPO), [:kdelibs]
+
 # Calligra
 Task.new :calligra, "kde/calligra", Repository.new("git@git.kde.org:calligra", Repository::GIT_REPO), [:kdelibs]
 
@@ -304,7 +311,7 @@ Task.new :kdevelop_php_docs, "kdevelop-php-docs", Repository.new("git@git.kde.or
 Task.new :kdevelop_full, nil, nil, [:kdevelop_php, :kdevelop_php_docs]
 
 # Full KDE distribution
-Task.new :full_kde, nil, nil, [:kdebase, :kdegraphics, :kdemultimedia, :kdenetwork, :kdeplasma_addons, :kdesdk, :kdepim, :kdeedu, :kdeutils, :kdegames, :kdetoys, :network_management, :kwebkitpart, :kdereview, :calligra, :kdevelop_full]
+Task.new :full_kde, nil, nil, [:kdebase, :kdegraphics, :kdemultimedia, :kdenetwork, :kdeplasma_addons, :kdesdk, :kdepim, :kdeutils, :kdegames, :kdetoys, :network_management, :kwebkitpart, :kdereview, :gwenview, :calligra, :kdevelop_full]
 
 #### PARSE USER DEFINED TASKS ##################################################
 
