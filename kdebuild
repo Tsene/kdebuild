@@ -60,6 +60,7 @@ $failed_tasks = { :configure => Array.new,
                   :build     => Array.new,
                   :install   => Array.new }
 $succeeded_tasks = Array.new
+$skipped_tasks = Array.new
 
 def info(info_msg)
   puts "\t-> #{info_msg}..."
@@ -143,6 +144,7 @@ class Task
     if not $options[:build_only] and not $options[:force_cmake] and @no_news
       puts "\t\tSkipping build and install phases. Repository was up-to-date"
       puts
+      $skipped_tasks << self
       @touched = true
       return
     end
@@ -426,6 +428,13 @@ if ARGV.empty?
 else
   for arg in ARGV
     run_task arg.to_sym
+  end
+end
+
+if not $skipped_tasks.empty?
+  puts "*** Skipped tasks:"
+  $skipped_tasks.each do |task|
+    puts "\t- #{task.name}"
   end
 end
 
