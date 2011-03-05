@@ -264,8 +264,14 @@
         "dependencies": ["kdevelop_php", "kdevelop_php_docs"]
     },
 
+    "kde_wallpapers": {
+        "source": "kde/wallpapers",
+        "repositoryType": "svn",
+        "repository": "svn+ssh://svn.kde.org/home/kde/trunk/KDE/kde-wallpapers"
+    },
+
     "full_kde": {
-        "dependencies": ["kdebase", "kdegraphics", "kdemultimedia", "kdenetwork", "kdeplasma_addons", "kdesdk", "kdepim", "kdeutils", "kdegames", "kdetoys", "network_management", "kwebkitpart", "kdereview", "rekonq", "gwenview", "calligra", "kdevelop_full"]
+        "dependencies": ["kdebase", "kdegraphics", "kdemultimedia", "kdenetwork", "kdeplasma_addons", "kdesdk", "kdepim", "kdeutils", "kdegames", "kdetoys", "network_management", "kwebkitpart", "kdereview", "rekonq", "gwenview", "calligra", "kdevelop_full", "kde_wallpapers"]
     }
 
 }
