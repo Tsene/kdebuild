@@ -15,16 +15,25 @@ INSTALL_COMMAND = "sudo make install/fast"
 MAKE_OPTIONS = "-j5"
 BUILD_TYPE = "Debug"
 SOURCE_DIR = File.expand_path "~/proyectos"
+CONFIG_FILE = File.expand_path "~/.kdebuild"
 DEFAULT_OBJECTIVE = :full_kde
 
 #### INTERNAL ##################################################################
 
+def user_has_config
+    File.exists? File.expand_path("~/.kdebuild")
+end
+
+def user_config
+  File.new(File.expand_path("~/.kdebuild")).read
+end
+
 def user_has_own_config
-  File.exists? File.join(ENV["HOME"], ".kdebuild")
+  File.exists? File.expand_path("~/.kdebuild-own")
 end
 
 def user_own_config
-  File.new(File.join(ENV["HOME"], ".kdebuild")).read
+  File.new(File.expand_path("~/.kdebuild-own")).read
 end
 
 def known_task(task)
@@ -32,9 +41,9 @@ def known_task(task)
 end
 
 begin
-  require "json" if user_has_own_config
+  require "json" if (user_has_config or user_has_own_config)
 rescue LoadError
-  puts "!!! You have set your own configuration on #{File.join(ENV["HOME"], ".kdebuild")}, and this"
+  puts "!!! You have set your own configuration on #{File.expand_path("~/.kdebuild-own")}, and this"
   puts "    format is JSON. In order to be able to understand the configuration file you need to run:"
   puts
   puts "    # sudo gem install json"
@@ -46,6 +55,8 @@ $stderr.reopen "/dev/null"
 ENV["PATH"] = "#{INSTALL_PREFIX}/bin:#{ENV["PATH"]}"
 ENV["PKG_CONFIG_PATH"] = "#{INSTALL_PREFIX}/lib/pkgconfig:#{ENV["PKG_CONFIG_PATH"]}"
 
+require "uri"
+require "net/http"
 require "fileutils"
 
 $options = {}
@@ -69,6 +80,18 @@ end
 def warn(warn_msg)
   puts "\t!!! #{warn_msg}"
 end
+
+def retrieve_file(remote, local)
+  uri = URI.parse remote
+  Net::HTTP.start(uri.host) do |http|
+    resp = http.get(uri.path)
+    open(File.expand_path(local), "wb") do |file|
+      file.write(resp.body)
+    end
+  end
+end
+
+retrieve_file("http://media.ereslibre.es/kdebuild/kdebuild", "~/.kdebuild") if not user_has_config
 
 class Repository
 
@@ -183,7 +206,7 @@ class Task
               puts "\t\tNo own configuration settings found. Using defaults"
             end
           rescue JSON::ParserError
-            puts "!!! Your own settings file under #{File.join(ENV["HOME"], ".kdebuild")} seems to be an invalid JSON file"
+            puts "!!! Your own settings file under #{File.expand_path("~/.kdebuild-own")} seems to be an invalid JSON file"
             puts
             puts "    Need help ? Try: http://www.jsonlint.com/"
             Process.exit 1
@@ -276,95 +299,24 @@ def run_task(task)
   end
 end
 
-#### DEFINE TASKS ##############################################################
-
-# KDE support and friends
-Task.new :phonon, "phonon", Repository.new("git@git.kde.org:phonon", Repository::GIT_REPO)
-Task.new :phonon_gstreamer, "phonon-gstreamer", Repository.new("git@git.kde.org:phonon-gstreamer", Repository::GIT_REPO)
-Task.new :phonon_full, nil, nil, [:phonon, :phonon_gstreamer]
-Task.new :polkit_qt_1, "polkit-qt-1", Repository.new("git@git.kde.org:polkit-qt-1", Repository::GIT_REPO)
-Task.new :automoc, "automoc", Repository.new("git@git.kde.org:automoc", Repository::GIT_REPO)
-Task.new :akonadi, "akonadi", Repository.new("git@git.kde.org:akonadi", Repository::GIT_REPO), [:automoc]
-Task.new :attica, "attica", Repository.new("git@git.kde.org:attica", Repository::GIT_REPO), [:automoc]
-Task.new :soprano, "soprano", Repository.new("git@git.kde.org:soprano", Repository::GIT_REPO), [:automoc]
-Task.new :kdesupport, "kde/kdesupport", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/kdesupport", Repository::SVN_REPO), [:phonon_full, :polkit_qt_1, :akonadi, :attica, :soprano]
-
-# KDE
-Task.new :kdelibs, "kde/KDE/kdelibs", Repository.new("git@git.kde.org:kdelibs", Repository::GIT_REPO), [:kdesupport]
-Task.new :kdepimlibs, "kde/KDE/kdepimlibs", Repository.new("git@git.kde.org:kdepimlibs", Repository::GIT_REPO), [:kdelibs]
-Task.new :konsole, "kde/KDE/kdebase-konsole", Repository.new("git@git.kde.org:konsole", Repository::GIT_REPO), [:kdelibs]
-Task.new :kate, "kde/KDE/kdebase-kate", Repository.new("git@git.kde.org:kate", Repository::GIT_REPO), [:kdelibs]
-Task.new :kde_baseapps, "kde/KDE/kde-baseapps", Repository.new("git@git.kde.org:kde-baseapps", Repository::GIT_REPO), [:kdelibs]
-Task.new :kde_workspace, "kde/KDE/kde-workspace", Repository.new("git@git.kde.org:kde-workspace", Repository::GIT_REPO), [:kdelibs]
-Task.new :kde_runtime, "kde/KDE/kde-runtime", Repository.new("git@git.kde.org:kde-runtime", Repository::GIT_REPO), [:kdelibs]
-Task.new :kdebase, nil, nil, [:kdepimlibs, :konsole, :kate, :kde_baseapps, :kde_workspace, :kde_runtime]
-Task.new :kdegraphics, "kde/KDE/kdegraphics", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdegraphics", Repository::SVN_REPO), [:kdelibs]
-Task.new :kdemultimedia, "kde/KDE/kdemultimedia", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdemultimedia", Repository::SVN_REPO), [:kdelibs]
-Task.new :kdenetwork, "kde/KDE/kdenetwork", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdenetwork", Repository::SVN_REPO), [:kdelibs]
-Task.new :kdeplasma_addons, "kde/KDE/kdeplasma-addons", Repository.new("git@git.kde.org:kdeplasma-addons", Repository::GIT_REPO), [:kdelibs]
-Task.new :kdesdk, "kde/KDE/kdesdk", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdesdk", Repository::SVN_REPO), [:kdelibs]
-Task.new :kdepim_runtime, "kde/KDE/kdepim-runtime", Repository.new("git@git.kde.org:kdepim-runtime", Repository::GIT_REPO), [:kdepimlibs]
-Task.new :kdepim, "kde/KDE/kdepim", Repository.new("git@git.kde.org:kdepim", Repository::GIT_REPO), [:kdepim_runtime]
-#Task.new :kdeedu, "kde/KDE/kdeedu", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeedu", Repository::SVN_REPO), [:kdelibs]
-Task.new :kdeutils, "kde/KDE/kdeutils", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeutils", Repository::SVN_REPO), [:kdelibs]
-Task.new :kdegames, "kde/KDE/kdegames", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdegames", Repository::SVN_REPO), [:kdelibs]
-Task.new :kdetoys, "kde/KDE/kdetoys", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdetoys", Repository::SVN_REPO), [:kdelibs]
-
-# Network management
-Task.new :network_management, "networkmanagement", Repository.new("git@git.kde.org:networkmanagement", Repository::GIT_REPO), [:kdebase]
-
-# Webkit KPart
-Task.new :kwebkitpart, "kwebkitpart", Repository.new("git@git.kde.org:kwebkitpart", Repository::GIT_REPO), [:kdebase]
-
-# kdereview
-Task.new :kdereview, "kde/kdereview", Repository.new("svn+ssh://svn.kde.org/home/kde/trunk/kdereview", Repository::SVN_REPO), [:kdelibs]
-
-# Rekonq
-Task.new :rekonq, "kde/rekonq", Repository.new("git@git.kde.org:rekonq", Repository::GIT_REPO), [:kdelibs]
-
-# Gwenview
-Task.new :gwenview, "kde/KDE/gwenview", Repository.new("git@git.kde.org:gwenview", Repository::GIT_REPO), [:kdelibs]
-
-# Calligra
-Task.new :calligra, "kde/calligra", Repository.new("git@git.kde.org:calligra", Repository::GIT_REPO), [:kdelibs]
-
-# KDevelop
-Task.new :kdevplatform, "kdevplatform", Repository.new("git@git.kde.org:kdevplatform", Repository::GIT_REPO), [:kdelibs]
-Task.new :kdevelop, "kdevelop", Repository.new("git@git.kde.org:kdevelop", Repository::GIT_REPO), [:kdevplatform]
-Task.new :kdevelop_pg_qt, "kdevelop-pg-qt", Repository.new("git@git.kde.org:kdevelop-pg-qt", Repository::GIT_REPO), [:kdevelop]
-Task.new :kdevelop_php, "kdevelop-php", Repository.new("git@git.kde.org:kdev-php", Repository::GIT_REPO), [:kdevelop, :kdevelop_pg_qt]
-Task.new :kdevelop_php_docs, "kdevelop-php-docs", Repository.new("git@git.kde.org:kdev-php-docs", Repository::GIT_REPO)
-Task.new :kdevelop_full, nil, nil, [:kdevelop_php, :kdevelop_php_docs]
-
-# Full KDE distribution
-Task.new :full_kde, nil, nil, [:kdebase, :kdegraphics, :kdemultimedia, :kdenetwork, :kdeplasma_addons, :kdesdk, :kdepim, :kdeutils, :kdegames, :kdetoys, :network_management, :kwebkitpart, :kdereview, :rekonq, :gwenview, :calligra, :kdevelop_full]
-
-#### PARSE USER DEFINED TASKS ##################################################
-
-if user_has_own_config
+def parse_tasks(config_tasks)
   begin
-    config = JSON.parse user_own_config
+    config = JSON.parse config_tasks
     config.each do |task, settings|
       next if known_task task
-      if not settings.has_key? "repositoryType"
-        puts "!!! Task #{task} is missing \"repositoryType\" entry"
-        Process.exit 1
-      end
-      if settings["repositoryType"].downcase != "svn" and settings["repositoryType"].downcase != "git"
-        puts "!!! \"repositoryType\" can only be: \"svn\" or \"git\". Found \"#{settings["repositoryType"]}\" at task #{task}"
-        Process.exit 1
-      end
-      if not settings.has_key? "repository"
-        puts "!!! Task #{task} is missing \"repository\" entry"
-        Process.exit 1
-      end
+      source = nil
+      repository = nil
+      build_system = nil
       if settings.has_key? "source"
         source = settings["source"]
       else
         source = task
       end
-      repository = Repository.new settings["repository"], (settings["repositoryType"].downcase == "svn" ? Repository::SVN_REPO : Repository::GIT_REPO)
-      build_system = Task::CMAKE
+      if settings.has_key?("repository") and settings.has_key?("repositoryType")
+        task_repository = settings["repository"]
+        task_repositoryType = (settings["repositoryType"].downcase == "svn" ? Repository::SVN_REPO : Repository::GIT_REPO)
+        repository = Repository.new task_repository, task_repositoryType
+      end
       if settings.has_key? "buildSystem"
         if settings["buildSystem"].downcase == "cmake"
           build_system = Task::CMAKE
@@ -393,11 +345,23 @@ if user_has_own_config
       end
     end
   rescue JSON::ParserError
-    puts "!!! Your own settings file under #{File.join(ENV["HOME"], ".kdebuild")} seems to be an invalid JSON file"
+    puts "!!! Your own settings file under #{File.expand_path("~/.kdebuild-own")} seems to be an invalid JSON file"
     puts
     puts "    Need help ? Try: http://www.jsonlint.com/"
     Process.exit 1
   end
+end
+
+#### PARSE DEFINED TASKS #######################################################
+
+if user_has_config
+    parse_tasks user_config
+end
+
+#### PARSE USER DEFINED TASKS ##################################################
+
+if user_has_own_config
+    parse_tasks user_own_config
 end
 
 #### PARSE ARGUMENTS AND START WORKING #########################################
@@ -430,7 +394,7 @@ if $options[:list_available_tasks]
 end
 
 if ARGV.empty?
-  run_task :full_kde
+  run_task DEFAULT_OBJECTIVE
 else
   for arg in ARGV
     run_task arg.to_sym

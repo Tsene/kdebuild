@@ -1,0 +1,34 @@
+{
+    "kdesupport": {
+        "configure": "-DWITH_ASF=On -DWITH_MP4=On"
+    },
+
+    "spokify": {
+        "repositoryType": "git",
+        "repository": "git://ereslibre.es/spokify",
+        "dependencies": ["kdelibs"]
+    },
+
+    "qjson": {
+        "repositoryType": "git",
+        "repository": "git://gitorious.org/qjson/qjson.git"
+    },
+
+    "qoauth": {
+        "repositoryType": "git",
+        "repository": "git://github.com/ayoy/qoauth.git",
+        "buildSystem": "qmake"
+    },
+
+    "choqok": {
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:choqok",
+        "dependencies": ["kdelibs", "qjson", "qoauth"]
+    },
+
+    "bespin" : {
+        "repositoryType": "svn",
+        "repository": "https://cloudcity.svn.sourceforge.net/svnroot/cloudcity",
+        "dependencies": ["kdelibs"]
+    }
+}
