@@ -326,6 +326,8 @@ def parse_tasks(config_tasks)
           puts "!!! Unknown buildSystem (#{settings["buildSystem"]}) for task #{task}"
           Process.exit 1
         end
+      elsif repository
+        build_system = Task::CMAKE
       end
       if settings.has_key? "dependencies"
         if settings["dependencies"].include? task
