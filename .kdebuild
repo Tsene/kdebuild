@@ -21,6 +21,18 @@
         "repository": "git@git.kde.org:polkit-qt-1"
     },
 
+    "polkit_kde_agent_1": {
+        "source": "kde/polkit-kde-agent-1",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:polkit-kde-agent-1"
+    },
+
+    "polkit_kde_kcmmodules_1": {
+        "source": "kde/polkit-kde-kcmmodules-1",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:polkit-kde-kcmmodules-1"
+    },
+
     "automoc": {
         "source": "kde/automoc",
         "repositoryType": "git",
@@ -104,7 +116,7 @@
     },
 
     "kdebase": {
-        "dependencies": ["kdepimlibs", "konsole", "kate", "kde_baseapps", "kde_workspace", "kde_runtime"]
+        "dependencies": ["kdepimlibs", "konsole", "kate", "kde_baseapps", "kde_workspace", "kde_runtime", "polkit_kde_agent_1", "polkit_kde_kcmmodules_1"]
     },
 
     "kdegraphics": {
