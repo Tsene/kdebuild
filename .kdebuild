@@ -27,10 +27,10 @@
         "repository": "git@git.kde.org:polkit-kde-agent-1"
     },
 
-    "polkit_kde_kcmmodules_1": {
-        "source": "kde/polkit-kde-kcmmodules-1",
+    "polkit_kde_kcmodules_1": {
+        "source": "kde/polkit-kde-kcmodules-1",
         "repositoryType": "git",
-        "repository": "git@git.kde.org:polkit-kde-kcmmodules-1"
+        "repository": "git@git.kde.org:polkit-kde-kcmodules-1"
     },
 
     "automoc": {
