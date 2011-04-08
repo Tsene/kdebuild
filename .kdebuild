@@ -116,7 +116,7 @@
     },
 
     "kdebase": {
-        "dependencies": ["kdepimlibs", "konsole", "kate", "kde_baseapps", "kde_workspace", "kde_runtime", "polkit_kde_agent_1", "polkit_kde_kcmmodules_1"]
+        "dependencies": ["kdepimlibs", "konsole", "kate", "kde_baseapps", "kde_workspace", "kde_runtime", "polkit_kde_agent_1", "polkit_kde_kcmodules_1"]
     },
 
     "kdegraphics": {
