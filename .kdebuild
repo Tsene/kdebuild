@@ -187,7 +187,7 @@
     "network_management": {
         "source": "kde/networkmanagement",
         "repositoryType": "git",
-        "repository": "git@git.kde.org:kdepim",
+        "repository": "git@git.kde.org:networkmanagement",
         "dependencies": ["kdebase"]
     },
 
