@@ -168,11 +168,155 @@
         "dependencies": ["kdepim_runtime"]
     },
 
-    "kdeedu": {
-        "source": "kde/KDE/kdeedu",
-        "repositoryType": "svn",
-        "repository": "svn+ssh://svn.kde.org/home/kde/trunk/KDE/kdeedu",
+    "libkdeedu" : {
+        "source": "kde/KDE/kdeedu/libkdeedu",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:libkdeedu",
         "dependencies": ["kdelibs"]
+    },
+
+    "blinken" : {
+        "source": "kde/KDE/kdeedu/blinken",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:blinken",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "cantor" : {
+        "source": "kde/KDE/kdeedu/cantor",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:cantor",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kalgebra" : {
+        "source": "kde/KDE/kdeedu/kalgebra",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:kalgebra",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kalzium" : {
+        "source": "kde/KDE/kdeedu/kalzium",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:kalzium",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kanagram" : {
+        "source": "kde/KDE/kdeedu/kanagram",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:kanagram",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kbruch" : {
+        "source": "kde/KDE/kdeedu/kbruch",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:kbruch",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kgeography" : {
+        "source": "kde/KDE/kdeedu/kgeography",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:kgeography",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "khangman" : {
+        "source": "kde/KDE/kdeedu/khangman",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:khangman",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kig" : {
+        "source": "kde/KDE/kdeedu/kig",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:kig",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kiten" : {
+        "source": "kde/KDE/kdeedu/kiten",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:kiten",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "klettres" : {
+        "source": "kde/KDE/kdeedu/klettres",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:klettres",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kmplot" : {
+        "source": "kde/KDE/kdeedu/kmplot",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:kmplot",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kstars" : {
+        "source": "kde/KDE/kdeedu/kstars",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:kstars",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "ktouch" : {
+        "source": "kde/KDE/kdeedu/ktouch",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:ktouch",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kturtle" : {
+        "source": "kde/KDE/kdeedu/kturtle",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:kturtle",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kwordquiz" : {
+        "source": "kde/KDE/kdeedu/kwordquiz",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:kwordquiz",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "marble" : {
+        "source": "kde/KDE/kdeedu/marble",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:marble",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "parley" : {
+        "source": "kde/KDE/kdeedu/parley",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:parley",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "rocs" : {
+        "source": "kde/KDE/kdeedu/rocs",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:rocs",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "step" : {
+        "source": "kde/KDE/kdeedu/step",
+        "repositoryType": "git",
+        "repository": "git@git.kde.org:step",
+        "dependencies": ["libkdeedu"]
+    },
+
+    "kdeedu": {
+        "dependencies": ["blinken", "cantor", "kalgebra", "kalzium", "kanagram", "kbruch", "kgeography", "khangman", "kig", "kiten", "klettres", "kmplot", "kstars", "ktouch", "kturtle", "kwordquiz", "marble", "parley", "rocs", "step"]
     },
 
     "kdeutils": {
@@ -283,7 +427,7 @@
     },
 
     "full_kde": {
-        "dependencies": ["kdebase", "kdegraphics", "kdemultimedia", "kdenetwork", "kdeplasma_addons", "kdesdk", "kdepim", "kdeutils", "kdegames", "kdetoys", "network_management", "kwebkitpart", "kdereview", "rekonq", "gwenview", "calligra", "kdevelop_full", "kde_wallpapers"]
+        "dependencies": ["kdebase", "kdegraphics", "kdemultimedia", "kdenetwork", "kdeplasma_addons", "kdesdk", "kdepim", "kdeutils", "kdeedu", "kdegames", "kdetoys", "network_management", "kwebkitpart", "kdereview", "rekonq", "gwenview", "calligra", "kdevelop_full", "kde_wallpapers"]
     }
 
 }
