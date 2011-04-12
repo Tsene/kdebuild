@@ -12,7 +12,7 @@
 
 INSTALL_PREFIX = "/usr/local"
 INSTALL_COMMAND = "sudo make install/fast"
-MAKE_OPTIONS = "-j5"
+MAKE_OPTIONS = "-j15"
 BUILD_TYPE = "Debug"
 SOURCE_DIR = File.expand_path "~/proyectos"
 CONFIG_FILE = File.expand_path "~/.kdebuild"
