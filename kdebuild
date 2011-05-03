@@ -122,7 +122,17 @@ class Repository
       (IO.popen("svn up").read =~ /Updated to revision \d+\./) != nil
     else
       info "Updating git repository"
+      info "Current branch is #{current_branch}"
       IO.popen("git pull origin master").read !~ /Already up-to-date\./
+    end
+  end
+
+  def current_branch
+    if @type == GIT_REPO
+      `git branch` =~ /^\* (.*)$/
+      $1
+    else
+      nil
     end
   end
 
