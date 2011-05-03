@@ -121,8 +121,7 @@ class Repository
       info "Updating SVN repository"
       (IO.popen("svn up").read =~ /Updated to revision \d+\./) != nil
     else
-      info "Updating git repository"
-      info "Current branch is #{current_branch}"
+      info "Updating git repository (#{current_branch})"
       IO.popen("git pull origin #{current_branch}").read !~ /Already up-to-date\./
     end
   end
