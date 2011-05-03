@@ -123,7 +123,7 @@ class Repository
     else
       info "Updating git repository"
       info "Current branch is #{current_branch}"
-      IO.popen("git pull origin master").read !~ /Already up-to-date\./
+      IO.popen("git pull origin #{current_branch}").read !~ /Already up-to-date\./
     end
   end
 
